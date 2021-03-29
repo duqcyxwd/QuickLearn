@@ -1,0 +1,36 @@
+Define a procedure called make-graph that implements a Graph ADT using object oriented design in Scheme. The make-graph procedure should return an object that supports the following operations via a message-passing style:
+
+(add-node x) - adds a given node (symbol/value) to the graph if it does not already exist.
+(add-edge x y) - adds a directed edge from node x to node y in the graph if both nodes exist and the edge does not.
+(remove-node x) - removes the given node from the graph if it exists. All links to the given node should be removed as well.
+(remove-edge x y) - removes the given edge from the graph if it exists.
+(display) - displays the contents of the graph to the user in the format: "node: edge edge edge", one node per line
+With the exceptionof the display method (which returns nothing), all other methods should return #t if successful and #f otherwise.
+
+Your graph should use list(s) (and/or pairs) as the backing data structure, storing the graph in an adjacency list format.
+For example: ((a . (b c)) (b . (c a)) (c . (a b c)) ...)
+
+You are encouraged to create any private helper functions or abstractions you may require to simplify the construction of the above methods.
+
+Here is an example interaction with a completed solution:
+
+
+(define G (make-graph))
+((G 'add-node) 'a)       ;=> #t
+((G 'add-node) 'b)       ;=> #t
+((G 'add-node) 'c)       ;=> #t
+((G 'add-node) 'a)       ;=> #f
+	
+((G 'add-edge) 'a 'b)    ;=> #t
+((G 'add-edge) 'a 'c)    ;=> #t
+((G 'add-edge) 'b 'b)    ;=> #t
+((G 'add-edge) 'b 'c)    ;=> #t
+((G 'add-edge) 'c 'd)    ;=> #f
+((G 'display))           ;=>> a: b c
+                              b: b c
+                              c:
+((G 'remove-edge) 'a 'c) ;=> #t
+((G 'remove-node) 'c)    ;=> #t
+((G 'display))           ;=>> a: b
+                              b: b
+ 
