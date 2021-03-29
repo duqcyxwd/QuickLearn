@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fd hello.scm | entr -s "cat hello.clj | mit-scheme --batch-mode"
