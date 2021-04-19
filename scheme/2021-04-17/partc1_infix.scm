@@ -17,11 +17,10 @@
 (define (eval-prefix tree)
   (cond
     ((number? tree) tree)
-    ((pair? tree) (execute-procedure (car tree) (car (cdr tree)) (car (cdr (cdr tree)))))))
+    ((pair? tree) (execute-procedure (car tree) (cadr tree) (caddr tree)))))
 
 ;; (D (eval-prefix '(+ 1 2)))
 ;; (D (eval-prefix '(+ (+ 100 100) (+ 200 200))))
-;; (D (eval-prefix '(+ (* 1 100) (/ 200 200))))
 ;; (D (eval-prefix '(+ (* 1 100) (/ 200 200))))
 ;; (D (eval-prefix '(* (+ 1 2) (* 1 (+ 1 (- 4 2))))))
 ;; (D (eval-prefix '(+ (+ 1 2) 3)))
@@ -38,8 +37,8 @@
     "Add bracket to first 3 elements"
     (cons (list (add-bracket (car infix))
                 (car (cdr infix))
-                (add-bracket (car (cdr (cdr infix)))))
-          (cdr (cdr (cdr infix)))))
+                (add-bracket (caddr infix)))
+          (cdddr infix)))
 
   (define (add-bracket infix)
     "parse infix and add bracket based on math logic"
@@ -47,19 +46,19 @@
           ((and (pair? infix)
                 (> (length infix) 3)) (cond
                                         ((multi-div? (car (cdr infix))) (add-bracket (add-bracket-impliment infix)))
-                                        ((and (plus-minus? (car (cdr infix)))
-                                              (multi-div? (car (cdr (cdr (cdr infix))))))
-                                         (add-bracket (append (list (car infix) (car (cdr infix)))
-                                                              (add-bracket-impliment (cdr (cdr infix))))))
+                                        ((and (plus-minus? (cadr infix))
+                                              (multi-div? (cadddr infix)))
+                                         (add-bracket (append (list (car infix) (cadr infix))
+                                                              (add-bracket-impliment (cddr infix)))))
                                         (else (add-bracket (add-bracket-impliment infix)))))
           (else infix)))
   (define (infix->prefix infix)
     "change format from infix to prefix"
     (cond
       ((number? infix) infix)
-      (else (list (car (cdr infix))
+      (else (list (cadr infix)
                   (infix->prefix (car infix))
-                  (infix->prefix (car (cdr (cdr infix))))))))
+                  (infix->prefix (caddr infix))))))
 
   (infix->prefix (add-bracket infix)))
 
