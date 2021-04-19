@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# fd hello.scm | entr -s "cat hello.clj | mit-scheme --batch-mode"
+
+# fd hello.scm | entr -s "cat 2021-03-29/hello.scm | mit-scheme --batch-mode"
+
+# fd -t f | entr -s "cat 2021-04-17/partc2_mci_letstar.scm | mit-scheme --batch-mode"
+# fd -t f | entr -s "clear && cat 2021-04-17/part1.scm | mit-scheme --batch-mode"
+fd -t f | entr -s "clear && cat 2021-04-17/partc1_infix.scm | mit-scheme --batch-mode"
+
