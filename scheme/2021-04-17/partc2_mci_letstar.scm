@@ -2,6 +2,17 @@
 ;;;; Based on The Structure and Interpretation of Computer Programs, Ch4.
 
 ;;;alias built-in apply -- must precede def of metacircular apply
+
+;; New code
+;; Changes include
+;; 1. eval
+;; 2. let?
+;; 3. let*?
+;; 4. let-binding
+;; 5. let-exp
+;; 6. eval-let
+;; 6. eval-let*
+
 (define apply-in-underlying-scheme apply)
 
 ;; --Eval/Apply--
@@ -12,6 +23,8 @@
         ((assignment? exp) (eval-assignment exp env))
         ((definition? exp) (eval-definition exp env))
         ((if? exp) (eval-if exp env))
+        ((let? exp) (eval-let exp env))
+        ((let*? exp) (eval-let* exp env))
         ((lambda? exp)
          (make-procedure (lambda-parameters exp)
                          (lambda-body exp)
@@ -357,11 +370,55 @@
   (driver-loop))
 
 
+(define D (lambda args (if (pair? args) (map (lambda (a) (display (string a " "))) args)) (display "\n")))
+(define DD (lambda args (apply-in-underlying-scheme D args) (display "\n")))
 
 ; -- Ignition! --
 'METACIRCULAR-INTERPRETER-LOADED
 
 (define the-global-environment (setup-environment))
-(driver-loop)
+(define (let? exp) (tagged-list? exp 'let))
+(define (let*? exp) (tagged-list? exp 'let*))
 
 
+(define (let-binding exp) (cadr exp))
+(define (let-exp exp) (caddr exp))
+
+
+(define (eval-let exp env)
+  (define (let-bind-keys exp)
+    (map car (cadr exp)))
+  (define (let-bind-values exp)
+    (map cadr (cadr exp)))
+  (let ((bind  (let-binding exp)))
+    (if (null? bind)
+      (eval (let-exp exp) env)
+      (eval (let-exp exp) (extend-environment (let-bind-keys exp)
+                                              (list-of-values (let-bind-values exp) env)
+                                              env)))))
+
+;; (D "\nLet result: " (eval '(let () (+ 100 1)) the-global-environment))
+;; (D "\nLet result: " (eval '(let ((x (* 4 100)) (y 201)) (+ y x)) the-global-environment))
+;; (D "\nLet result: " (eval '(let ((a 1) (b 2)) (+ a b)) the-global-environment))
+
+(define (eval-let* exp env)
+  (define (extend-let-environment exp)
+    (extend-environment (list (caar (let-binding exp)))
+                        (list-of-values (cdar (let-binding exp)) env)
+                        env))
+  (if (null? (let-binding exp))
+    (eval (let-exp exp) env)
+    (if (null? (cdr (let-binding exp)))
+      (eval (let-exp exp) (extend-let-environment exp))
+      (eval-let* (list (car exp) (cdr (let-binding exp)) (let-exp exp))
+                 (extend-let-environment exp)))))
+
+;; (D "\nLet result: " (eval '(let* () (+ 1 1)) the-global-environment))
+;; (D "\nLet result: " (eval '(let* ((x (* 4 100)) (y 201) (z 2000)) (+ x (+ y z))) the-global-environment))
+;; (D "\nLet result: " (eval '(let* ((x 100)) (+ x 1)) the-global-environment))
+;; (D "\nLet result: " (eval '(let* ((x (* 2 2)) (y (* x 2)) (z 100)) (* z (+ y x))) the-global-environment))
+
+(DD "\n\n--------------------End---------------------")
+
+
+;; (driver-loop)
